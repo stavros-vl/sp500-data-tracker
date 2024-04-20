@@ -440,6 +440,12 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Ignore json files
 *.json
 
+# Ignore CSV files
 *.csv
+*.csv.gz
+
+# Ignore venv file
+myenv
