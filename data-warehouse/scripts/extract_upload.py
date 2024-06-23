@@ -67,7 +67,7 @@ def yfinance_to_gcs(bucket_name, start_date, end_date):
 # Get yesterday's date
 yesterday_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-yfinance_to_gcs(BUCKET, '2024-01-01', yesterday_date)
+yfinance_to_gcs(BUCKET, '2024-06-20', yesterday_date)
 
 
 
