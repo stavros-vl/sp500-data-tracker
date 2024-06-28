@@ -1,43 +1,13 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
-from google.cloud import storage
+from helpers.upload_to_gcs import upload_to_gcs
 import os
 import pandas as pd
 import yfinance as yf
 
 # Constants
 BUCKET = "sp500-tracker-terrabucket"
-
-# Helper function to upload to GCS
-def upload_to_gcs(bucket, object_name, local_file):
-    """
-    Uploads a file to Google Cloud Storage.
-    
-    Args:
-        bucket (str): The name of the bucket.
-        object_name (str): The name of the object in the bucket.
-        local_file (str): The local file path to upload.
-    """
-    client = storage.Client()
-    bucket = client.bucket(bucket)
-    blob = bucket.blob(object_name)
-    blob.upload_from_filename(local_file)
-
-# Function to fetch data from Wikipedia and upload to GCS
-def wikipedia_to_gcs(bucket_name):
-    """
-    Scrapes S&P 500 ticker data from Wikipedia and uploads it to Google Cloud Storage.
-
-    Args:
-        bucket_name (str): The name of the Google Cloud Storage bucket to upload the data to.
-    """
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    sp500_tickers = pd.read_html(url)[0]
-    date = datetime.now().strftime('%Y%m%d')
-    local_file_path = 'sp500_wiki_data.csv'
-    sp500_tickers.to_csv(local_file_path, index=False)
-    upload_to_gcs(bucket_name, f'sp500_wiki_data_{date}.csv', local_file_path)
 
 # Function to fetch data from Yahoo Finance and upload to GCS
 def yfinance_to_gcs(bucket_name, start_date, end_date):
@@ -71,19 +41,13 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    'sp500_data_pipeline',
+    'sp500_yfinance_data_pipeline',
     default_args=default_args,
-    description='A DAG to fetch and upload S&P 500 data to GCS',
+    description='A DAG to fetch S&P 500 data from wikipedia and upload to GCS',
     schedule_interval=timedelta(days=1),
     start_date=datetime(2023, 1, 1),
     catchup=False,
 ) as dag:
-
-    task_wikipedia_to_gcs = PythonOperator(
-        task_id='wikipedia_to_gcs',
-        python_callable=wikipedia_to_gcs,
-        op_args=[BUCKET],
-    )
 
     task_yfinance_to_gcs = PythonOperator(
         task_id='yfinance_to_gcs',
@@ -91,4 +55,4 @@ with DAG(
         op_args=[BUCKET, '2024-01-01', (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')],
     )
 
-    task_wikipedia_to_gcs >> task_yfinance_to_gcs
+    task_yfinance_to_gcs
