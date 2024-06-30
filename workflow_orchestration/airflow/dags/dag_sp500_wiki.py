@@ -55,7 +55,7 @@ with DAG(
         bucket=BUCKET,
         source_objects=['latest/sp500_wiki_data.csv'],
         destination_project_dataset_table='sp500_tables.sp500_wiki_data',
-        write_disposition='WRITE_TRUNCATE',
+        write_disposition='WRITE_TRUNCATE', # this means that if the destination table already exists, it will overwrite its contents
         dag=dag
     )
 
