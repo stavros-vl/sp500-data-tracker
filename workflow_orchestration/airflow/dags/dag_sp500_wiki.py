@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from airflow.contrib.operators import gcs_to_bq
 from datetime import datetime, timedelta
 from helpers.upload_to_gcs import upload_to_gcs
 import os
@@ -21,7 +22,7 @@ def wikipedia_to_gcs(bucket_name):
     date = datetime.now().strftime('%Y%m%d')
     local_file_path = 'sp500_wiki_data.csv'
     sp500_tickers.to_csv(local_file_path, index=False)
-    upload_to_gcs(bucket_name, f'sp500_wiki_data_{date}.csv', local_file_path)
+    upload_to_gcs(bucket_name, f'latest/sp500_wiki_data.csv', local_file_path)
 
 # Default arguments for the DAG
 default_args = {
@@ -49,12 +50,13 @@ with DAG(
         op_args=[BUCKET],
     )
 
-    task_create_bigquery_table = create_bigquery_table(
-        bucket_name=BUCKET,
-        object_name='sp500_wiki_data_20240420.csv',
-        dataset_name='sp500_tables',  # Replace with your dataset name
-        table_name='sp500_wiki_data',  # Replace with your table name
-        dag=dag,
+    task_create_bigquery_table = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
+        task_id='gcs_to_bq_table',
+        bucket=BUCKET,
+        source_objects=['latest/sp500_wiki_data.csv'],
+        destination_project_dataset_table='sp500_tables.sp500_wiki_data',
+        write_disposition='WRITE_TRUNCATE',
+        dag=dag
     )
 
-    task_wikipedia_to_gcs
+    task_wikipedia_to_gcs >> task_create_bigquery_table
