@@ -83,7 +83,7 @@ with DAG(
     task_create_bigquery_table = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
         task_id='gcs_to_bq_table',
         bucket=BUCKET,
-        source_objects=['latest/sp500_finance_data_*.csv.gz'],  # Use a wildcard to match all relevant files
+        source_objects=['latest/sp500_finance_data.csv.gz'],  # Use a wildcard to match all relevant files
         destination_project_dataset_table='sp500_tables.sp500_finance_data',
         write_disposition='WRITE_APPEND',  # Append data to existing table
         dag=dag
