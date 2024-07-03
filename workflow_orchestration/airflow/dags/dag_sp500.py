@@ -44,7 +44,7 @@ def yfinance_to_gcs(bucket_name):
         sp500_df.to_csv(local_file_path)
         
         # Upload to latest folder
-        latest_object_name = f'latest/sp500_finance_data_{date}.csv.gz'
+        latest_object_name = f'latest/sp500_finance_data.csv.gz'
         upload_to_gcs(bucket_name, latest_object_name, local_file_path)
         
         # Upload to historical folder
