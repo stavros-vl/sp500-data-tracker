@@ -2,7 +2,7 @@
 End-to-end ELT project for stock market data
 
 
-## Runnning and configuring GCP VM 
+## Running and configuring GCP VM 
 This project is run on a [GCP Virtual Machine](https://cloud.google.com/products/compute?hl=en). 
 
 Reasons are:
