@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 from gcs_utils import upload_to_gcs
+import argparse
 
 BUCKET = os.environ.get("GCP_GCS_BUCKET", "sp500-tracker-terrabucket")
 
@@ -67,7 +68,30 @@ def yfinance_to_gcs(bucket_name, start_date, end_date):
 # Get yesterday's date
 yesterday_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-yfinance_to_gcs(BUCKET, '2024-01-01', yesterday_date)
+def main():
+    parser = argparse.ArgumentParser(description="Run financial data scripts with specified parameters.")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # Subparser for wikipedia_to_gcs
+    parser_wiki = subparsers.add_parser('wikipedia_to_gcs', help="Run the wikipedia_to_gcs function.")
+    parser_wiki.add_argument('--bucket', type=str, default=BUCKET, help='The GCS bucket name.')
+
+    # Subparser for yfinance_to_gcs
+    parser_yfinance = subparsers.add_parser('yfinance_to_gcs', help="Run the yfinance_to_gcs function.")
+    parser_yfinance.add_argument('--bucket', type=str, default=BUCKET, help='The GCS bucket name.')
+    parser_yfinance.add_argument('--start_date', type=str, required=True, help='Start date for downloading financial data (format: YYYY-MM-DD).')
+    parser_yfinance.add_argument('--end_date', type=str, help='End date for downloading financial data (format: YYYY-MM-DD).')
+
+    args = parser.parse_args()
+
+    if args.command == 'wikipedia_to_gcs':
+        wikipedia_to_gcs(args.bucket)
+    elif args.command == 'yfinance_to_gcs':
+        end_date = args.end_date if args.end_date else (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        yfinance_to_gcs(args.bucket, args.start_date, end_date)
+
+if __name__ == "__main__":
+    main()
 
 
 
