@@ -2,7 +2,7 @@
 End-to-end ELT project for stock market data
 
 
-## Running and configuring GCP VM 
+## Running and configuring the GCP VM 
 This project is run on a [GCP Virtual Machine](https://cloud.google.com/products/compute?hl=en). 
 
 Reasons are:
@@ -21,7 +21,7 @@ $ nano .ssh/config
 3. To open the VM's shell run the following command:
 
 ```
-ssh <name_of_the_VM_instance>
+$ ssh <name_of_the_VM_instance>
 ```
 
 4. (optional). Connect to VM instance through VSCode
