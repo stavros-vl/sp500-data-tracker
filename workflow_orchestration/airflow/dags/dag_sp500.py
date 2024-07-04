@@ -30,6 +30,8 @@ def yfinance_to_gcs(bucket_name):
         try:
             data = yf.download(symbol, start=start_date, end=end_date)
             if not data.empty:
+                # Ensure 'Volume' is treated as float
+                data['Volume'] = data['Volume'].astype(float)
                 sp500_data[symbol] = data
                 print(f"Downloaded data for {symbol}")
             else:
