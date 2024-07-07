@@ -60,7 +60,7 @@ This is a quick guide on how to setup dbt with BigQuery on Docker.
     docker compose build 
     ```
   - ```bash 
-    docker compose run dbt-bq-dtc init
+    docker compose run dbt-sp500-tracker init
     ``` 
     - **Note:** We are essentially running `dbt init` above because the `ENTRYPOINT` in the [Dockerfile](Dockerfile) is `['dbt']`.
     - Input the required values. Project name will be `dbt_sp500_tracker`
