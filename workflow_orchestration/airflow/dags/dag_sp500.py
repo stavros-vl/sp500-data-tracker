@@ -23,8 +23,8 @@ def yfinance_to_gcs(bucket_name):
     sp500_symbols = sp500_tickers.Symbol.to_list()
     sp500_data = {}
 
-    end_date = datetime.now().strftime('%Y-%m-%d')
-    start_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    end_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')  # Previous day
+    start_date = end_date # Only fetch data for the previous day
 
     for symbol in sp500_symbols:
         try:
@@ -41,9 +41,16 @@ def yfinance_to_gcs(bucket_name):
 
     if sp500_data:
         sp500_df = pd.concat(sp500_data.values(), keys=sp500_data.keys(), names=['Ticker'])
+        sp500_df.reset_index(inplace=True)  # Ensure 'Ticker' and 'Date' are columns
+        sp500_df['Date'] = sp500_df['Date'].dt.strftime('%Y-%m-%d')  # Format 'Date' column
+
+        # Add ingestion timestamp column
+        ingestion_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sp500_df['ingestion_timestamp'] = ingestion_timestamp
+
         date = datetime.now().strftime('%Y%m%d%H%M%S')  # Unique timestamp
         local_file_path = f'sp500_finance_data_{date}.csv.gz'
-        sp500_df.to_csv(local_file_path)
+        sp500_df.to_csv(local_file_path, index=False, compression='gzip')
         
         # Upload to latest folder
         latest_object_name = f'latest/sp500_finance_data.csv.gz'
@@ -71,7 +78,7 @@ with DAG(
     'sp500_yfinance_data_pipeline',
     default_args=default_args,
     description='A DAG to fetch S&P 500 data from wikipedia and upload to GCS',
-    schedule_interval=timedelta(days=1),
+    schedule_interval='0 2 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
 ) as dag:

@@ -56,6 +56,13 @@ def yfinance_to_gcs(bucket_name, start_date, end_date):
     # Concatenate data for all tickers into a single DataFrame
     sp500_df = pd.concat(sp500_data.values(), keys=sp500_data.keys(), names=['Ticker'])
 
+    sp500_df.reset_index(inplace=True)  # Ensure 'Ticker' and 'Date' are columns
+    sp500_df['Date'] = sp500_df['Date'].dt.strftime('%Y-%m-%d')  # Format 'Date' column
+
+    # Add ingestion timestamp column
+    ingestion_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    sp500_df['ingestion_timestamp'] = ingestion_timestamp
+
     # Save to local CSV
     date = datetime.now().strftime('%Y%m%d')
     local_file_path = f'sp500_finance_data_{date}.csv.gz'
