@@ -1,6 +1,24 @@
 # sp500-data-tracker
 End-to-end ELT project for stock market data
 
+## How to run
+### Activate virtual environment (See [venv tutorial](https://docs.python.org/3/tutorial/venv.html))
+1. Create virtual environment
+```
+$ python -m venv myvenv
+```
+2. Activate virtual environment
+```
+$ source myvenv/bin/activate
+```
+3. Install requirements
+```
+$ pip install -r requirements.txt
+```
+4. Deactivate virtual environment
+```
+$ deactivate
+```
 
 ## Running and configuring the GCP VM 
 This project is run on a [GCP Virtual Machine](https://cloud.google.com/products/compute?hl=en). 
